@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+#define endl '\n'
+#define case(t, c) cout<<"Case "<<t<<":"<<c
+#define dbg(x) cout<<(#x)<<" "<<x<<endl;
+
+class fraction {
+public:
+    long long numerator, denominator, g, l;
+
+    fraction(long long a, long long b) : numerator(a), denominator(b) {
+        g = gcd(abs(numerator), abs(denominator));
+        if (denominator < 0)
+            numerator *= -1, denominator *= -1;
+        numerator /= g;
+        denominator /= g;
+    }
+
+    fraction operator+(const fraction &other) {
+        l = lcm(other.denominator, denominator);
+        long long a = other.numerator * (l / other.denominator) + numerator * (l / denominator);
+        long long b = l;
+        return fraction(a, b);
+    }
+
+    fraction operator-(const fraction &other)  {
+        l = lcm(other.denominator, denominator);
+        long long a = numerator * (l / denominator) - other.numerator * (l / other.denominator);
+        long long b = l;
+        return fraction(a, b);
+    }
+
+    fraction operator*(const fraction &other) const {
+        long long a = other.numerator * numerator;
+        long long b = other.denominator * denominator;
+        return fraction(a, b);
+    }
+
+    fraction operator/(const fraction &other) const {
+        long long a = other.denominator * numerator;
+        long long b = other.numerator * denominator;
+        return fraction(a, b);
+    }
+
+    bool operator<(const fraction &other) const {
+        return numerator * other.denominator < denominator * other.numerator;
+    }
+
+    bool operator>(const fraction &other) const {
+        return numerator * other.denominator > denominator * other.numerator;
+    }
+
+    bool operator==(const fraction &other) const {
+        return (numerator == other.numerator && other.denominator == denominator);
+    }
+
+};
+
+ostream &operator<<(ostream &os, const fraction &x) {
+    os << x.numerator << "/" << x.denominator;
+    return os;
+
+}
+long long sqroot(long long x) {
+    long long i = 0;
+    while ((i + 1) * (i + 1) <= x)
+        i++;
+    if ((i * i) == x)
+        return i;
+    return -1;
+}
+vector<fraction> root(fraction a, fraction b, fraction c) {
+    vector<fraction> ss;
+    fraction determinant = b * b - (fraction(4, 1) * a * c);
+    long long x = sqroot(determinant.numerator), y = sqroot(determinant.denominator);
+    if (x != -1 && y != -1) {
+        ss.emplace_back((b * fraction(-1, 1) + fraction(x, y)) / (fraction(2, 1) * a));
+        ss.emplace_back((b * fraction(-1, 1) - fraction(x, y)) / (fraction(2, 1) * a));
+    }
+    return ss;
+
+}
+int main() {
+    ios_base::sync_with_stdio(false), cin.tie(nullptr);
+    long long t, te = 0;
+    cin >> t;
+    while (t--) {
+        long long a1, a2, b1, b2, c1, c2, d1, d2, e1, e2, f1, f2;
+        cin >> a1 >> a2 >> b1 >> b2 >> c1 >> c2 >> d1 >> d2 >> e1 >> e2 >> f1 >> f2;
+        set<fraction> ans;
+        fraction a = fraction(a1, a2), b = fraction(b1, b2), c = fraction(c1, c2);
+        fraction d = fraction(d1, d2), e = fraction(e1, e2), f = fraction(f1, f2);
+        auto temp = root(d, e, f - fraction(1, 1));
+        for (auto &i : temp) {
+            ans.insert(i);
+        }
+        temp = root(d, e, f + fraction(1, 1));
+        for (auto &i : temp) {
+            fraction xx = a * i * i + b * i + c;
+            if (xx.numerator % 2 == 0)
+                ans.insert(i);
+        }
+        temp = root(a, b, c);
+        for (auto &i : temp) {
+            fraction xx = d * i * i + e * i + f;
+            if (!(xx == fraction(0, 1)))
+                ans.insert(i);
+        }
+
+        case(++te, ' ');
+        cout << (ans.empty() ? -1 : (int) ans.size());
+        for (auto &i : ans) {
+            if (i.denominator == 1)
+                cout << " " << i.numerator;
+            else
+                cout << " " << i.numerator << "/" << i.denominator;
+        }
+        cout << endl;
+
+    }
+    return 0;
+}
+/*
+1
+1 1 0 1 0 1 1 1 0 1 0 1
+a a b b c c d d e e f f
+ */
